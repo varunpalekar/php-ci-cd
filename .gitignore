@@ -6,3 +6,4 @@ Homestead.json
 public/images
 storage/
 .DS_Store
+docker-data
