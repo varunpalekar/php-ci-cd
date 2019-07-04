@@ -9,7 +9,9 @@
         "laravel/framework": "5.2.*",
         "laravelcollective/html": "5.2.*",
         "mews/purifier": "^2.0",
-        "intervention/image": "^2.3"
+        "intervention/image": "^2.3",
+        "opencensus/opencensus": "^0.5.2",
+        "opencensus/opencensus-exporter-jaeger": "~0.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

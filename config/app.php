@@ -160,6 +160,9 @@ return [
 
         Intervention\Image\ImageServiceProvider::class,
 
+        // Opencensus
+        App\Providers\OpenCensusProvider::class,
+
     ],
 
     /*
