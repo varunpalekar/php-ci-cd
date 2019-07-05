@@ -1,0 +1,23 @@
+- name: create project directory {{ docker_service_deploy_project_dir }}
+  file: path={{ docker_service_deploy_project_dir }} state=directory
+
+- name: copy docker to host
+  copy: src={{ playbook_dir }}/.. dest={{ docker_service_deploy_project_dir }}
+  
+- name: Ensure SELinux is set to enforcing mode
+  lineinfile:
+    path: '{{ docker_service_deploy_project_dir }}/env.local'
+    regexp: '^MYSQL_USERNAME='
+    line: 'MYSQL_USERNAME={{ MYSQL_USERNAME }}'
+
+- name: Ensure SELinux is set to enforcing mode
+  lineinfile:
+    path: '{{ docker_service_deploy_project_dir }}/env.local'
+    regexp: '^MYSQL_ROOT_PASSWORD='
+    line: 'MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}'    
+
+- name: start project
+  docker_service:
+    project_src: "{{ docker_service_deploy_project_dir }}"
+    state: present
+    restarted: yes

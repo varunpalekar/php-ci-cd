@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+  # Nginx web server
+  webserver: 
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/etc/nginx/conf.d/:/etc/nginx/conf.d/
+  
+  # PHP-fpm server
+  app:
+    volumes:
+       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      APP_ENV: dev
+
+  ## MYSQL db
+  db:
+    volumes:
+      - ./docker-data/mysql:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: your_mysql_root_password
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+    ports:
+      - 8001:80
+    networks:
+    - app-network
+
+networks:
+  app-network:
+    driver: bridge
