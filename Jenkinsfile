@@ -11,11 +11,9 @@ pipeline {
                     submoduleCfg: [],
 			        userRemoteConfigs: [[url: 'https://github.com/VaibhavPrajapati/Basic-PHP-Application.git']]
                 ])					
-			    withDockerContainer('composer') {
-			        script {
-				        echo "install compose.json"
-                        sh 'composer install --prefer-source'				
-			        }					
+                script {
+                    echo "install compose.json"
+                    sh 'composer install --prefer-source'				
                 }
             }
         }
@@ -26,7 +24,7 @@ pipeline {
                 }
             }
             steps {
-                withDockerContainer('php') {
+                
 			        script {
                         try{
 				        echo "Running Test cases"
@@ -35,8 +33,7 @@ pipeline {
                         catch(Exception e){
                             echo "Skipped test"
                         }				
-			        }
-                }       
+			        }  
             }
         }
 		stage('CodeAnalysis') {
