@@ -13,41 +13,43 @@ pipeline {
                 ])					
                 script {
                     echo "install compose.json"
-                    sh 'composer install --prefer-source'				
+                    sh 'composer install --prefer-source'
+                    sh 'printenv'			
                 }
             }
         }
         stage('Test') {
-            when {
-                expression {
-                    GIT_BRANCH ==~ /.*master|.*feature|.*development|.*hotfix/
-                }
+            environment {
+                DB_HOST = "localhost"
+                DB_DATABASE = "laravel_test"
+                DB_USERNAME = "laravel_test"
+                DB_PASSWORD = "my_pass"
             }
             steps {
-                
-			        script {
-                        try{
-				        echo "Running Test cases"
-			     	    sh './vendor/bin/phpunit --colors tests'
-                        }
-                        catch(Exception e){
-                            echo "Skipped test"
-                        }				
-			        }  
+                script {
+                    try{
+                    echo "Running Test cases"
+                    sh 'mkdir -p database ; touch database/database.sqlite'
+                    sh './vendor/bin/phpunit --colors tests'
+                    }
+                    catch(Exception e){
+                        echo "Skipped test"
+                    }				
+                }  
             }
         }
 		stage('CodeAnalysis') {
             when {
                 expression {
-                    GIT_BRANCH ==~ /.*master|.*feature|.*development|.*hotfix/
+                    GIT_BRANCH ==~ /.*master|.*feature\/.*|.*develop|.*hotfix\/./
                 }
             }
-            steps {			
+            steps {	
 			    script {
                     scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                }                
-                withSonarQubeEnv('sonar-server') {
-                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+                withSonarQubeEnv('nitor-sonar') {
+                    sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-scanner.properties"
                 }
             }
         }
