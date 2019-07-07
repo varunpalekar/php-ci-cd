@@ -4,7 +4,7 @@
   register: st
 
 - name: Checked docker, Install if not install
-  include_tasks: roles/deployment/tasks/install_docker.yml
+  include_tasks: install_docker.yml
   when: st.stat.exists == False
   
 - stat:
@@ -12,8 +12,14 @@
   register: stcomp
 
 - name: hecked docker_compose, Install if not install
-  include_tasks: roles/deployment/tasks/install_docker_compose.yml
+  include_tasks: install_docker_compose.yml
   when: stcomp.stat.exists == False
 
 - name: Deploy-application
-  include_tasks: roles/deployment/tasks/deploy_docker_service.yml 
+  include_tasks: deploy_docker_service.yml
+
+- name: Undeploy-application
+  include_tasks: undeploy_docker_service.yml
+  tags: 
+    - never 
+    - undeploy

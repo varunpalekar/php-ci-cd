@@ -3,14 +3,6 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-				    branches: [[name: '*/*']],
-		            doGenerateSubmoduleConfigurations: false,
-	         	    extensions: [],
-                    submoduleCfg: [],
-			        userRemoteConfigs: [[url: 'https://github.com/VaibhavPrajapati/Basic-PHP-Application.git']]
-                ])					
                 script {
                     echo "install compose.json"
                     sh 'composer install --prefer-source'
@@ -18,7 +10,7 @@ pipeline {
                 }
             }
         }
-        stage('Test') {
+        stage('UnitTest') {
             environment {
                 DB_HOST = "localhost"
                 DB_DATABASE = "laravel_test"
@@ -28,78 +20,98 @@ pipeline {
             steps {
                 script {
                     try{
-                    echo "Running Test cases"
-                    sh 'mkdir -p database ; touch database/database.sqlite'
-                    sh './vendor/bin/phpunit --colors tests'
+                        echo "Running Test cases"
+                        sh './vendor/bin/phpunit --colors tests --log-junit reports/junit.xml'
                     }
                     catch(Exception e){
-                        echo "Skipped test"
-                    }				
+                        if ( GIT_BRANCH ==~ /.*master|.*develop|.*hotfix\/.*|.*release\/.*/ )
+                            error "Test case failed"
+                        else
+                            echo "Skipped test if from personal or feature branch"
+                    }
+                    try{
+                        echo "Running Test code coverage"
+                        sh './vendor/bin/phpunit --coverage-clover reports/codeCoverage.xml'
+                    }
+                    catch(Exception e){
+                        if ( GIT_BRANCH ==~ /.*master|.*develop|.*hotfix\/.*|.*release\/.*/ )
+                            error "Code coverage failed"
+                        else
+                            echo "Skipped code coverage if from personal or feature branch"
+                    }
                 }  
             }
         }
-		stage('CodeAnalysis') {
+        stage('CodeAnalysis') {
             when {
                 expression {
-                    GIT_BRANCH ==~ /.*master|.*feature\/.*|.*develop|.*hotfix\/./
+                    GIT_BRANCH ==~ /.*master|.*feature\/.*|.*develop|.*hotfix\/.*|.*release\/.*/
                 }
             }
             steps {	
-			    script {
+                script {
                     scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                 }
                 withSonarQubeEnv('nitor-sonar') {
-                    sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-scanner.properties"
+                    sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
         }
-		stage('StoreArtifact') {
+        stage('StoreArtifact') {
             when {
                 expression {
-                    GIT_BRANCH ==~ /.*master|.*feature|.*development|.*hotfix/
+                    GIT_BRANCH ==~ /.*master|.*release\/.*|.*develop|.*hotfix\/.*/
                 }
             }
             steps {
-			    script{
-			    	echo "Store Artifact in local workspace"
-				    sh 'tar -cvf ${BUILD_NUMBER}.tar  .'
+                script{
+                    echo "Store Artifact in local workspace"
+                    sh 'tar -cvf ${BUILD_NUMBER}.tar  .'
                     archiveArtifacts '*.tar'
-			    }
-            }
-        }
-        stage('Deploy_Stage') {
-            when {
-                expression {
-                    GIT_BRANCH ==~ /.*master|.*feature|.*hotfix/
-                }
-            }
-            steps {
-			    script{
-			    	echo "Deploy application on stage environment"
-				    sh 'docker-compose build'
-                    sh 'docker push vaibhavprajapati12/laravel-php-fpm'
-                    withDockerRegistry(credentialsId: 'a4807db0-ff22-4bff-a48f-63d598efb98c', url: 'https://index.docker.io/v1/') {
-                        sh 'docker push vaibhavprajapati12/laravel-php-fpm'
-			        }
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts', playbook: 'playbook.yml'
                 }
             }
         }
         stage('Deploy_Dev') {
             when {
                 expression {
-                    GIT_BRANCH ==~ /.*development/
+                    GIT_BRANCH ==~ /.*develop/
                 }
             }
             steps {
-			    script{
-			    	echo "Deploy application on developmment environment"
-				    sh 'docker-compose build'
-                    sh 'docker push vaibhavprajapati12/laravel-php-fpm'
-                    withDockerRegistry(credentialsId: 'a4807db0-ff22-4bff-a48f-63d598efb98c', url: 'https://index.docker.io/v1/') {
-                        sh 'docker push vaibhavprajapati12/laravel-php-fpm'
-			        }
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts', playbook: 'playbook.yml'
+                script{
+                    echo "Deploy application on developmment environment"
+                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'deploy'
+                }
+            }
+        }
+        stage('Undeploy_Dev'){
+            when {
+                expression {
+                    GIT_BRANCH ==~ /.*develop/
+                }
+            }
+            // timeout(time:5, unit:'DAYS') {
+            //     input message:'Approve deployment?', submitter: 'it-ops'
+            // }
+            steps {
+                input message: "Do you want to undeploy DEV?"
+                script {
+                    echo "Undeploy application on developmment environment"
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'undeploy'
+                }
+            }
+        }
+        stage('Deploy_Prod') {
+            when {
+                expression {
+                    GIT_BRANCH ==~ /.*master|.*release\/.*|.*hotfix\/.*/
+                }
+            }
+            steps {
+                input message: "Do you want to proceed for production deployment?"
+                script{
+                    echo "Deploy application on stage environment"
+                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'deploy'
                 }
             }
         }

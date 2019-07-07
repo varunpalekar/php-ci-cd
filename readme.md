@@ -13,3 +13,11 @@
  4)To Run Test Cases
  
  >> Run phpunit
+
+ ## Things required
+
+ 1. composer: 
+   a. php-net-socket
+
+2. test-coverage 
+   a. php-xdebug

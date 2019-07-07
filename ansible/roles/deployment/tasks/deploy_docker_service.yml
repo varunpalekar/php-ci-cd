@@ -1,3 +1,5 @@
+---
+
 - name: create project directory {{ docker_service_deploy_project_dir }}
   file: path={{ docker_service_deploy_project_dir }} state=directory
 
