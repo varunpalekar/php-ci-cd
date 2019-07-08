@@ -1,28 +1,33 @@
-deployment_mysql_hospice_username: hospice_user
-deployment_mysql_hospoce_password: dev@password
+deployment_project_dir: '/data/hospice/docker_compose'
 
 deployment_webserver:
   ports:
-  - "80"
-  - "443"
+    - "80"
+    - "443"
   volumes:
     - ./:/var/www
     - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
 
 deployment_app:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: varun/laravel-php-fpm
   environment:
     APP_ENV: dev
-    APP_DEBUG: "true"
+    APP_DEBUG: true
     APP_KEY: base64:oPD/hrRXGvA1hydZp17JAQH2PnflMgp4P5OMWoldWTM=
 
     DB_HOST: db
-    DB_DATABASE: laravel
+    DB_DATABASE: 
     DB_USERNAME: root
     DB_PASSWORD: your_mysql_root_password
 
     JAEGER_HOST: jaeger
     JAEGER_PORT: 6831
     JAEGER_ENABLE: "false"
+
+  working_dir: /var/www
   volumes:
     - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
 
@@ -33,3 +38,5 @@ deployment_db:
   environment:
     MYSQL_DATABASE: laravel
     MYSQL_ROOT_PASSWORD: your_mysql_root_password
+    SERVICE_TAGS: dev
+    SERVICE_NAME: mysql

@@ -1,0 +1,21 @@
+
+- name: docker-compose exec migration
+  shell: "docker-compose -f docker-compose.yml -f docker-compose.{{env}}.yml exec app php artisan migrate"
+  args:
+    chdir: "{{ deployment_project_dir }}"
+  register: deployment_migration_output
+  loop: 
+    - migrate
+    - status
+  tags:
+    - migration
+
+- debug: 
+    msg: "{{ item.key }}: {{ item.value }}"
+  loop:
+    - key: "{{ deployment_migration_output.results[0].item }}"
+      value: "{{ deployment_migration_output.results[0].stdout }}"
+    - key: "{{deployment_migration_output.results[1].item}}"
+      value: "{{deployment_migration_output.results[1].stdout}}"
+  tags:
+    - migration

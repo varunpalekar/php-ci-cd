@@ -1,25 +1,29 @@
 ---
-- stat:
-    path: /usr/bin/docker
-  register: st
 
-- name: Checked docker, Install if not install
-  include_tasks: install_docker.yml
-  when: st.stat.exists == False
-  
-- stat:
-    path: /usr/local/bin/docker-compose
-  register: stcomp
+- name: install required packages
+  package: 
+    name: "{{ item }}"
+  loop: 
+    - python-pip
 
-- name: hecked docker_compose, Install if not install
-  include_tasks: install_docker_compose.yml
-  when: stcomp.stat.exists == False
+- name: install docker python module
+  pip:
+    name: "{{ item }}"
+  loop:
+    - docker
+    - docker-compose
 
 - name: Deploy-application
-  include_tasks: deploy_docker_service.yml
+  include_tasks: deploy.yml
 
 - name: Undeploy-application
-  include_tasks: undeploy_docker_service.yml
+  include_tasks: undeploy.yml
   tags: 
     - never 
     - undeploy
+
+- name: migration update
+  include_tasks: migration.yml
+  tags:
+    - never
+    - migration

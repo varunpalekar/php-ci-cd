@@ -1,0 +1,37 @@
+---
+
+- name: create project directory {{ deployment_project_dir }}
+  file: path={{ deployment_project_dir }} state=directory
+
+- name: push project code
+  synchronize: 
+    src: "{{ playbook_dir }}/.."
+    dest: "{{ deployment_project_dir }}"
+    dirs: yes
+    rsync_opts:
+      - "--exclude=docker-data"
+
+- name: create override docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ deployment_project_dir }}/docker-compose.{{env}}.yml"
+
+- name: start project
+  docker_service:
+    project_src: "{{ deployment_project_dir }}"
+    build: yes
+    files:
+      - docker-compose.yml
+      - "docker-compose.{{env}}.yml"
+    state: present
+    restarted: yes
+  register: deployment_service_out
+
+- name: get docker-port of webserver
+  shell: docker-compose -f docker-compose.yml -f docker-compose.{{env}}.yml port webserver 80
+  args:
+    chdir: "{{ deployment_project_dir }}"
+  register: deployment_webserver_port
+
+- debug:
+    msg: "Webserver dynamic URL: http://{{ ansible_ssh_host }}:{{ deployment_webserver_port.stdout | regex_search('(?<=:).*') }}"

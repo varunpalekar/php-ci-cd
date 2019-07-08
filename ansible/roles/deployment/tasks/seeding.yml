@@ -1,0 +1,11 @@
+- name: docker-compose exec seeding
+  shell: "docker-compose -f docker-compose.yml -f docker-compose.{{env}}.yml exec app php artisan {{ item }}"
+  args:
+    chdir: "{{ deployment_project_dir }}"
+  register: deployment_seeding_out
+  loop: 
+    - db:seed --class=UsersTableSeeder
+    - db:seed --class=PostsTableSeeder
+    - db:seed --class=PostsTableSeeder
+  tags: 
+    - seeding

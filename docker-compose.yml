@@ -23,15 +23,6 @@ services:
     networks:
       - app-network
 
-  ## MYSQL db
-  db:
-    image: mysql:5.7.22
-    container_name: db
-    restart: unless-stopped
-    tty: true
-    networks:
-      - app-network
-
 networks:
   app-network:
     driver: bridge

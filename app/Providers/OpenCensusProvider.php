@@ -15,6 +15,9 @@ class OpenCensusProvider extends ServiceProvider
         if (php_sapi_name() == 'cli') {
             return;
         }
+        if (env('JAEGER_ENABLE', 'true') == "false") {
+            return;
+        }
         // Enable OpenCensus extension integrations
         Laravel::load();
         Mysql::load();
@@ -26,19 +29,13 @@ class OpenCensusProvider extends ServiceProvider
             'client' => null
         ];
 
-        // $options = [
-        //     "host" => 'jaeger',
-        //     "port" => '6831',
-        //     "tags" => [],
-        //     'client' => null
-        // ];
-
         // Start the request tracing for this request
         $exporter = new JaegerExporter( env('APP_NAME', 'Laravel') ,$options);
-        // file_put_contents('/tmp/test.echo', var_dump($exporter));
-        //$exporter = new EchoExporter();
+        
+        // $exporter = new EchoExporter();
         // $exporter = new FileExporter('/var/www/opentrace.log');
         Tracer::start($exporter);
+
         // Create a span that starts from when Laravel first boots (public/index.php)
         Tracer::inSpan(['name' => 'bootstrap', 'startTime' => LARAVEL_START], function () {});
     }

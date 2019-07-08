@@ -16,8 +16,12 @@
 
  ## Things required
 
- 1. composer: 
+1. composer: 
    a. php-net-socket
 
 2. test-coverage 
    a. php-xdebug
+
+3. jenkins plugin
+   1. sonar scanner 
+      

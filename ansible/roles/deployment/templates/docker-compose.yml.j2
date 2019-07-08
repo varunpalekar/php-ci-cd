@@ -1,0 +1,80 @@
+version: "3"
+
+services:
+{% if deployment_webserver %}
+  webserver:
+{% if deployment_webserver.ports is defined %}
+    ports:
+{% for val in deployment_webserver.ports %}
+      - {{ val }}
+{% endfor %}
+{% endif %}
+
+{% if deployment_webserver.volumes is defined %}
+    volumes: 
+{% for val in deployment_webserver.volumes %}
+      - {{ val }}
+{% endfor %}
+{% endif %}
+
+{% if deployment_webserver.environment is defined %}
+    environment:
+{% for key, val in deployment_webserver.environment.iteritems() %}
+      {{ key }} : "{{ val }}"
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if deployment_app %}
+  # PHP-fpm server
+  app:
+{% if deployment_app.ports is defined %}
+    ports:
+{% for val in deployment_app.ports %}
+      - {{ val }}
+{% endfor %}
+{% endif %}
+
+{% if deployment_app.volumes is defined %}
+    volumes: 
+{% for val in deployment_app.volumes %}
+      - {{ val }}
+{% endfor %}
+{% endif %}
+
+{% if deployment_app.environment is defined %}
+    environment:
+{% for key, val in deployment_app.environment.iteritems() %}
+      {{ key }} : "{{ val }}"
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if deployment_db %}
+  ## MYSQL db
+  db:
+{% if deployment_db.ports is defined %}
+    ports:
+{% for val in deployment_db.ports %}
+      - {{ val }}
+{% endfor %}
+{% endif %}
+
+{% if deployment_db.volumes is defined %}
+    volumes: 
+{% for val in deployment_db.volumes %}
+      - {{ val }}
+{% endfor %}
+{% endif %}
+    image: mysql:5.7.22
+    container_name: db
+    restart: unless-stopped
+    networks:
+      - app-network
+{% if deployment_db.environment is defined %}
+    environment:
+{% for key, val in deployment_db.environment.iteritems() %}
+      {{ key }} : "{{ val }}"
+{% endfor %}
+{% endif %}
+{% endif %}

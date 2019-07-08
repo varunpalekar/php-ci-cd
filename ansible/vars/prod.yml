@@ -1,0 +1,53 @@
+---
+mysql_root_password: !vault |
+    $ANSIBLE_VAULT;1.1;AES256
+    61313835633639326662623933393862353361653161346634363638333366353765323631343866
+    6232366537616336333262663236643965653266643461320a643166336261363662393037303837
+    31313833326439616265393066373730383439613366626462643335633966633436353436633936
+    3361623431323365650a326163366662316431366364366230326137336630616233613166383364
+    3565
+
+mysql_root_username: root
+
+deployment_mysql_hospice_name: hospice
+deployment_mysql_hospice_username: hospice_user
+deployment_mysql_hospoce_password: !vault |
+    $ANSIBLE_VAULT;1.1;AES256
+    33343136386364626234333131386135353238643462643939666137386235663131663834353561
+    3565623930363030636334633230396639303835643034390a306130373830303332653837613835
+    36346233396535643433383139366564643064343037373135333934376530623932653163303266
+    3466653231353838350a616466356430306463353239396361363737373339383664666663653963
+    3664
+
+deployment_db: false
+deployment_webserver:
+  ports:
+    - "80"
+    - "443"
+  volumes:
+    - ./:/var/www
+    - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+
+deployment_app:
+  environment:
+    APP_ENV: prod
+    APP_DEBUG: "true"
+    APP_KEY: base64:oPD/hrRXGvA1hydZp17JAQH2PnflMgp4P5OMWoldWTM=
+
+    DB_HOST: localhost
+    DB_DATABASE: "{{ deployment_mysql_hospice_name }}"
+    DB_USERNAME: "{{ deployment_mysql_hospice_username }}"
+    DB_PASSWORD: "{{ deployment_mysql_hospoce_password }}"
+
+  volumes:
+    - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+mysql_databases:
+  - name: "{{ deployment_mysql_hospice_name }}"
+    encoding: latin1
+    collation: latin1_general_ci
+mysql_users:
+  - name: "{{ deployment_mysql_hospice_username }}"
+    host: "%"
+    priv: "hospice.*:ALL"
+    password: "{{ deployment_mysql_hospoce_password }}"

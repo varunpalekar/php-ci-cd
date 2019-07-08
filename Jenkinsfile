@@ -82,8 +82,23 @@ pipeline {
                     echo "Deploy application on developmment environment"
                     ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'deploy'
                 }
+
+                input message: "Do you want to run migration?"
+
+                script{
+                    echo "Deploy application on developmment environment"
+                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'migration'
+                }
+
+                input message: "Do you want to run seeding?"
+
+                script{
+                    echo "Deploy application on developmment environment"
+                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'seeding'
+                }
             }
         }
+        
         stage('Undeploy_Dev'){
             when {
                 expression {

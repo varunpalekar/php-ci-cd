@@ -1,0 +1,14 @@
+---
+
+- name: stop docker compose
+  docker_service:
+    project_src: "{{ deployment_project_dir }}"
+    files:
+      - docker-compose.yml
+      - "docker-compose.{{env}}.yml"
+    state: absent
+
+- name: delete project folder
+  file: 
+    state: absent
+    path: "{{ deployment_project_dir }}"
