@@ -84,7 +84,7 @@ pipeline {
                 script{
                     echo "Deploy application on developmment environment"
                     dir("ansible") {
-                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'deploy'
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml'
                     }
                 }
 
@@ -138,7 +138,7 @@ pipeline {
                 script{
                     echo "Deploy application on stage environment"
                     dir("ansible") {
-                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'deploy',  credentialsId: 'ansible-hospice-prod'
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', credentialsId: 'ansible-hospice-prod'
                     }
                 }
 
