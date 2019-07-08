@@ -6,7 +6,10 @@ pipeline {
                 script {
                     echo "install compose.json"
                     sh 'composer install --prefer-source'
-                    sh 'printenv'			
+                    sh 'printenv'
+                    dir('ansible') {
+                        sh 'ansible-galaxy install -r requirements.yml'
+                    }
                 }
             }
         }
@@ -80,21 +83,27 @@ pipeline {
             steps {
                 script{
                     echo "Deploy application on developmment environment"
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'deploy'
+                    dir("ansible") {
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'deploy'
+                    }
                 }
 
                 input message: "Do you want to run migration?"
 
                 script{
                     echo "Deploy application on developmment environment"
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'migration'
+                    dir("ansible") {
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'migration'
+                    }
                 }
 
                 input message: "Do you want to run seeding?"
 
                 script{
                     echo "Deploy application on developmment environment"
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'seeding'
+                    dir("ansible") {
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'seeding'
+                    }
                 }
             }
         }
@@ -112,7 +121,9 @@ pipeline {
                 input message: "Do you want to undeploy DEV?"
                 script {
                     echo "Undeploy application on developmment environment"
+                    dir("ansible") {
                         ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', tags: 'undeploy'
+                    }
                 }
             }
         }
@@ -126,13 +137,17 @@ pipeline {
                 input message: "Do you want to proceed for production deployment?"
                 script{
                     echo "Deploy application on stage environment"
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'deploy',  credentialsId: 'ansible-hospice-prod'
+                    dir("ansible") {
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'deploy',  credentialsId: 'ansible-hospice-prod'
+                    }
                 }
 
                 input message: "Do you want to proceed for production migration?"
                 script{
                     echo "Deploy application on stage environment"
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'migration', credentialsId: 'ansible-hospice-prod'
+                    dir("ansible") {
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'migration', credentialsId: 'ansible-hospice-prod'
+                    }
                 }
             }
         }

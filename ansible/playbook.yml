@@ -4,8 +4,8 @@
   vars_files: 
     - "vars/{{ env }}.yml"
   roles:
-    # - role: mysql
-    #   when: env == 'prod'
-    # - role: docker
-    #   docker_install_compose: true
+    - role: mysql
+      when: env == 'prod'
+    - role: docker
+      docker_install_compose: true
     - role: deployment
