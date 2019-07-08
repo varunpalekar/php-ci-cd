@@ -126,7 +126,13 @@ pipeline {
                 input message: "Do you want to proceed for production deployment?"
                 script{
                     echo "Deploy application on stage environment"
-                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'deploy'
+                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'deploy',  credentialsId: 'ansible-hospice-prod'
+                }
+
+                input message: "Do you want to proceed for production migration?"
+                script{
+                    echo "Deploy application on stage environment"
+                    ansiblePlaybook installation: 'ansible', inventory: 'hosts-prod', playbook: 'playbook.yml', tags: 'migration', credentialsId: 'ansible-hospice-prod'
                 }
             }
         }
