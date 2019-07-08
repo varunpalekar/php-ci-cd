@@ -85,14 +85,6 @@ services:
     networks:
     - app-network
 
-  jenkins:
-    image: jenkins/jenkins:lts
-    volumes:
-      - ./docker-data/jenkins:/var/jenkins_home
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-
 networks:
   app-network:
     driver: bridge
