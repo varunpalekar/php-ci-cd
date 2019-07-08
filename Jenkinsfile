@@ -24,7 +24,7 @@ pipeline {
                         sh './vendor/bin/phpunit --colors tests --log-junit reports/junit.xml'
                     }
                     catch(Exception e){
-                        if ( GIT_BRANCH ==~ /.*master|.*develop|.*hotfix\/.*|.*release\/.*/ )
+                        if ( GIT_BRANCH ==~ /.*master|.*hotfix\/.*|.*release\/.*/ )
                             error "Test case failed"
                         else
                             echo "Skipped test if from personal or feature branch"
@@ -34,7 +34,7 @@ pipeline {
                         sh './vendor/bin/phpunit --coverage-clover reports/codeCoverage.xml'
                     }
                     catch(Exception e){
-                        if ( GIT_BRANCH ==~ /.*master|.*develop|.*hotfix\/.*|.*release\/.*/ )
+                        if ( GIT_BRANCH ==~ /.*master|.*hotfix\/.*|.*release\/.*/ )
                             error "Code coverage failed"
                         else
                             echo "Skipped code coverage if from personal or feature branch"
