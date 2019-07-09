@@ -1,6 +1,6 @@
 
 - name: docker-compose exec migration
-  shell: "unbuffer docker-compose -f docker-compose.yml -f docker-compose.{{env}}.yml exec app php artisan migrate"
+  shell: "docker-compose -f docker-compose.yml -f docker-compose.{{env}}.yml exec -T app php artisan migrate"
   args:
     chdir: "{{ deployment_project_dir }}"
   register: deployment_migration_output
