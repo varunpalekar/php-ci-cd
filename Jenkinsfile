@@ -56,7 +56,7 @@ pipeline {
                     scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                 }
                 withSonarQubeEnv('sonarqube.io') {
-                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=varunpalekar_php-test -Dsonar.organization=varunpalekar-github"
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.branch.name=${GIT_BRANCH} -Dsonar.projectKey=varunpalekar_php-test -Dsonar.organization=varunpalekar-github"
                 }
             }
         }
@@ -66,12 +66,16 @@ pipeline {
                     GIT_BRANCH ==~ /.*master|.*release\/.*|.*develop|.*hotfix\/.*/
                 }
             }
-            docker.withRegistry('', 'public-docker-hub') {
-                def customImage = docker.build("varunpalekar1/php-test:${env.BUILD_ID}")
-                customImage.push()
+            steps {
+                script{
+                    docker.withRegistry('', 'public-docker-hub') {
+                        def customImage = docker.build("varunpalekar1/php-test:${env.BUILD_ID}")
+                        customImage.push()
 
-                if ( GIT_BRANCH ==~ /.*master|.*hotfix\/.*|.*release\/.*/ )
-                    customImage.push('latest')
+                        if ( GIT_BRANCH ==~ /.*master|.*hotfix\/.*|.*release\/.*/ )
+                            customImage.push('latest')
+                    }
+                }
             }
         }
         stage('Deploy_Dev') {
