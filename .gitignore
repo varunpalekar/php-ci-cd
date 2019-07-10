@@ -4,6 +4,5 @@ Homestead.yaml
 Homestead.json
 .env
 public/images
-storage/
 .DS_Store
 docker-data

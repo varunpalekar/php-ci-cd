@@ -12,6 +12,8 @@
       - "--exclude=docker-data"
   loop: 
     - public
+    - docker-compose.yml
+    - docker
 
 - name: create override docker-compose file
   template:

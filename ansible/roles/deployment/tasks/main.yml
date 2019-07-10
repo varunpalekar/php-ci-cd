@@ -27,3 +27,9 @@
   tags:
     - never
     - migration
+
+- name: seeding
+  include_tasks: seeding.yml
+  tags: 
+    - never
+    - seeding

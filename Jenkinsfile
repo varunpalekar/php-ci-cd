@@ -1,5 +1,12 @@
+def getdockertag(){
+    return "${env.GIT_BRANCH}".replace("/",".") + "."+"${env.BUILD_ID}"
+}    
 pipeline {
     agent any
+    environment {
+        DOCKER_REGISTRY = "varunpalekar1/php-test"
+        DOCKER_TAG = getdockertag()
+    }
     stages {
         stage('Build') {
             steps {
@@ -69,7 +76,8 @@ pipeline {
             steps {
                 script{
                     docker.withRegistry('', 'public-docker-hub') {
-                        def customImage = docker.build("varunpalekar1/php-test:${env.BUILD_ID}")
+                        
+                        def customImage = docker.build("${env.DOCKER_REGISTRY}:${env.DOCKER_TAG}")
                         customImage.push()
 
                         if ( GIT_BRANCH ==~ /.*master|.*hotfix\/.*|.*release\/.*/ )
@@ -89,7 +97,7 @@ pipeline {
                     echo "Deploy application on developmment environment"
                     dir("ansible") {
                         ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', extraVars: [
-                            deployment_app_image: "varunpalekar1/php-test:${env.BUILD_ID}"
+                            deployment_app_image: "${env.DOCKER_REGISTRY}:${env.DOCKER_TAG}"
                         ]
                     }
                 }
