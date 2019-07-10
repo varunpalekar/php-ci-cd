@@ -55,23 +55,23 @@ pipeline {
                 script {
                     scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                 }
-                withSonarQubeEnv('nitor-sonar') {
-                    sh "${scannerHome}/bin/sonar-scanner"
+                withSonarQubeEnv('sonarqube.io') {
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=varunpalekar_php-test -Dsonar.organization=varunpalekar-github"
                 }
             }
         }
-        stage('StoreArtifact') {
+        stage('DockerPush') {
             when {
                 expression {
                     GIT_BRANCH ==~ /.*master|.*release\/.*|.*develop|.*hotfix\/.*/
                 }
             }
-            steps {
-                script{
-                    echo "Store Artifact in local workspace"
-                    sh 'tar -cvf ${BUILD_NUMBER}.tar  .'
-                    archiveArtifacts '*.tar'
-                }
+            docker.withRegistry('', 'public-docker-hub') {
+                def customImage = docker.build("varunpalekar1/php-test:${env.BUILD_ID}")
+                customImage.push()
+
+                if ( GIT_BRANCH ==~ /.*master|.*hotfix\/.*|.*release\/.*/ )
+                    customImage.push('latest')
             }
         }
         stage('Deploy_Dev') {
@@ -84,7 +84,9 @@ pipeline {
                 script{
                     echo "Deploy application on developmment environment"
                     dir("ansible") {
-                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml'
+                        ansiblePlaybook installation: 'ansible', inventory: 'hosts-dev', playbook: 'playbook.yml', extraVars: [
+                            deployment_app_image: "varunpalekar1/php-test:${env.BUILD_ID}"
+                        ]
                     }
                 }
 

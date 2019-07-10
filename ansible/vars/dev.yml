@@ -1,5 +1,6 @@
 deployment_mysql_hospice_username: hospice_user
 deployment_mysql_hospoce_password: dev@password
+deployment_app_image: varunpalekar1/php-test:latest
 
 deployment_webserver:
   ports:
@@ -10,6 +11,7 @@ deployment_webserver:
     - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
 
 deployment_app:
+  image: "{{ deployment_app_image }}"
   environment:
     APP_ENV: dev
     APP_DEBUG: "true"

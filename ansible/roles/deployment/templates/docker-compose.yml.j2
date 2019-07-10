@@ -35,6 +35,10 @@ services:
 {% endfor %}
 {% endif %}
 
+{% if deployment_app.image is defined %}
+    image: {{ deployment_app.image }}
+{% endif %}
+
 {% if deployment_app.volumes is defined %}
     volumes: 
 {% for val in deployment_app.volumes %}

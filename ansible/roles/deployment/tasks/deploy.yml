@@ -5,21 +5,28 @@
 
 - name: push project code
   synchronize: 
-    src: "{{ playbook_dir }}/.."
+    src: "{{ playbook_dir }}/../{{ item }}"
     dest: "{{ deployment_project_dir }}"
     dirs: yes
     rsync_opts:
       - "--exclude=docker-data"
+  loop: 
+    - public
 
 - name: create override docker-compose file
   template:
     src: docker-compose.yml.j2
     dest: "{{ deployment_project_dir }}/docker-compose.{{env}}.yml"
 
+- name: docker pull deployable image
+  docker_image: 
+    name: "{{ deployment_app_image }}"
+    source: pull
+
 - name: start project
   docker_service:
     project_src: "{{ deployment_project_dir }}"
-    build: yes
+    build: no
     files:
       - docker-compose.yml
       - "docker-compose.{{env}}.yml"

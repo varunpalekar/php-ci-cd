@@ -20,6 +20,7 @@ deployment_mysql_hospoce_password: !vault |
     3664
 
 deployment_db: false
+deployment_app_image: varunpalekar1/php-test:latest
 deployment_webserver:
   ports:
     - "80"
@@ -29,6 +30,7 @@ deployment_webserver:
     - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
 
 deployment_app:
+  image: "{{ deployment_app_image }}"
   environment:
     APP_ENV: prod
     APP_DEBUG: "true"
