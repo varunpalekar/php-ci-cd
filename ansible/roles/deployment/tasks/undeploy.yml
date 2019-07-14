@@ -7,8 +7,12 @@
       - docker-compose.yml
       - "docker-compose.{{env}}.yml"
     state: absent
+  tags:
+    - undeploy
 
 - name: delete project folder
   file: 
     state: absent
     path: "{{ deployment_project_dir }}"
+  tags:
+    - undeploy
