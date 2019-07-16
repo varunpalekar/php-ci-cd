@@ -1,0 +1,4 @@
+receivers:
+  jaeger:
+    collector_thrift_port: 14267
+    collector_http_port: 14268

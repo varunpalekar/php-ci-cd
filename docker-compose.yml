@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  # Nginx web server
+  webserver: 
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    networks:
+      - app-network
+  
+  # PHP-fpm server
+  app: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: varun/laravel-php-fpm
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

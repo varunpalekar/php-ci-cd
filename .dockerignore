@@ -1,0 +1,8 @@
+docker-data
+*.tar
+ansible
+sonar-project.properties
+.git
+docker-compose.yml
+.env
+vendor

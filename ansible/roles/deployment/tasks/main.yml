@@ -1,0 +1,35 @@
+---
+
+- name: install required packages
+  package: 
+    name: "{{ item }}"
+  loop: 
+    - python-pip
+
+- name: install docker python module
+  pip:
+    name: "{{ item }}"
+  loop:
+    - docker
+    - docker-compose
+
+- name: Deploy-application
+  include_tasks: deploy.yml
+
+- name: Undeploy-application
+  include_tasks: undeploy.yml
+  tags: 
+    - never 
+    - undeploy
+
+- name: migration update
+  include_tasks: migration.yml
+  tags:
+    - never
+    - migration
+
+- name: seeding
+  include_tasks: seeding.yml
+  tags: 
+    - never
+    - seeding

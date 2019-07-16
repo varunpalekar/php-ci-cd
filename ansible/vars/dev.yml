@@ -1,0 +1,37 @@
+deployment_mysql_hospice_username: hospice_user
+deployment_mysql_hospoce_password: dev@password
+deployment_app_image: varunpalekar1/php-test:latest
+
+deployment_webserver:
+  ports:
+  - "80"
+  - "443"
+  volumes:
+    - ./:/var/www
+    - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+
+deployment_app:
+  image: "{{ deployment_app_image }}"
+  environment:
+    APP_ENV: dev
+    APP_DEBUG: "true"
+    APP_KEY: base64:oPD/hrRXGvA1hydZp17JAQH2PnflMgp4P5OMWoldWTM=
+
+    DB_HOST: db
+    DB_DATABASE: laravel
+    DB_USERNAME: root
+    DB_PASSWORD: your_mysql_root_password
+
+    JAEGER_HOST: jaeger
+    JAEGER_PORT: 6831
+    JAEGER_ENABLE: "false"
+  volumes:
+    - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+deployment_db:
+  volumes:
+    - ./docker-data/mysql:/var/lib/mysql
+    - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+  environment:
+    MYSQL_DATABASE: laravel
+    MYSQL_ROOT_PASSWORD: your_mysql_root_password

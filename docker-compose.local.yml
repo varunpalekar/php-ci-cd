@@ -1,0 +1,90 @@
+version: "3"
+
+services:
+  # Nginx web server
+  webserver: 
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+  
+  # PHP-fpm server
+  app: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: varun/laravel-php-fpm
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+      TERM: xterm
+      APP_ENV: local
+      XDEBUG_CONFIG: idekey=PHPSTORM
+    working_dir: /var/www
+    volumes:
+       - ./:/var/www
+       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+  ## MYSQL db
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - ./docker-data/mysql:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: your_mysql_root_password
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+    ports:
+      - 8001:80
+    networks:
+    - app-network
+
+  # # You can enable this if don't want to host jaeger outside
+  jaeger:
+    # container_name: laravel_jaeger
+    image: jaegertracing/all-in-one:1.6
+    restart: always
+    ports:
+      # - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      # - 5778:5778
+      - 16686:16686
+      # - 14268:14268
+      # - 9411:9411
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    networks:
+    - app-network
+
+networks:
+  app-network:
+    driver: bridge

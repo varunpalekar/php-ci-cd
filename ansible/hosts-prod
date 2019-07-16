@@ -1,0 +1,5 @@
+[hospice]
+192.168.94.42 ansible_user=vagrant
+
+[all:vars]
+env=prod

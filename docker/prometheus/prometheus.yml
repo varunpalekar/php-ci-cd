@@ -1,0 +1,19 @@
+scrape_configs:
+  # Scrape Prometheus itself every 5 seconds.
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - localhost:9090
+
+  # Scrape the Node Exporter every 5 seconds.
+  - job_name: 'jaeger'
+    scrape_interval: 5s
+    static_configs:
+      - targets: 
+        - jaeger:16686
+  - job_name: nginx
+    scrape_interval: 5s
+    static_configs:
+      - targets: 
+        - nginx_exporter:9113
